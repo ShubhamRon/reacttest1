@@ -39,7 +39,7 @@ jobs:
             cd /home/azureuser/server
             sudo rm -rf healthcare_static_build/build/*
             
-            scp -r ${GITHUB_WORKSPACE}/build/. healthcare_static_build/build/
+            scp -r ${GITHUB_WORKSPACE}/build/ healthcare_static_build/build/
             
             docker-compose down
             docker-compose build
