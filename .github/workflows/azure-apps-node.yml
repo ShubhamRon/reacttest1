@@ -19,29 +19,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Debug - Pre-build directory structure
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -la
-          echo "Package.json contents:"
-          cat package.json
-        
       - name: Start the build
         run: |
           CI=false # remove this after fixing warnings 
           npm run build
         
-      - name: Debug - Post-build directory structure
+      - name: Verify build output
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -la
-          echo "Build directory contents (if exists):"
-          ls -la build || echo "Build directory does not exist"
+          echo "Current directory: $(pwd)"
+          echo "Build directory contents:"
+          ls -la build
           
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          
+      - name: SCP files to VM
+        run: |
+          scp -r build/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/azureuser/server/healthcare_static_build/build/
+        
       - name: Deploy to VM
         uses: appleboy/ssh-action@master
         with:
@@ -53,15 +51,7 @@ jobs:
             cd /home/azureuser/server
             echo "Changed to directory: $(pwd)"
             
-            sudo rm -rf healthcare_static_build/build/*
-            
-            # Ensure the destination directory exists
-            mkdir -p healthcare_static_build/build
-            
-            # Use rsync with debug output
-            rsync -avz --delete /home/runner/work/reacttest1/reacttest1/build/ healthcare_static_build/build/
-            
-            # List contents after rsync
+            # List contents after SCP
             echo "Contents of healthcare_static_build/build/:"
             ls -R healthcare_static_build/build/
             
