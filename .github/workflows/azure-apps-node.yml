@@ -1,11 +1,14 @@
 name: Strict ESLint Check
+
 on:
   pull_request:
-    branches:
-      - main
+    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
+
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   lint:
@@ -13,38 +16,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'
-        
-    - name: Install dependencies
-      run: npm install
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
 
-    - name: Run ESLint
-      run: npm run lint:strict
-      continue-on-error: true
-      id: eslint
+      - name: Debug - List directory contents
+        run: ls -la
 
-    - name: Check ESLint result
-      if: steps.eslint.outcome == 'failure'
-      run: |
-        echo "ESLint found issues. Failing the workflow."
-        exit 1
+      - name: Debug - Print working directory
+        run: pwd
 
-    - name: Block PR if ESLint fails
-      if: failure() && github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN }}
-        script: |
-          github.rest.pulls.createReview({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            pull_number: context.issue.number,
-            event: 'REQUEST_CHANGES',
-            body: 'ESLint check failed. Please fix all linting issues (including warnings) before merging.'
-          })
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Debug - List installed packages
+        run: npm list
+
+      - name: Run ESLint
+        run: npm run lint:strict
+        continue-on-error: true
+        id: eslint
+
+      - name: Check ESLint result
+        if: steps.eslint.outcome == 'failure'
+        run: |
+          echo "ESLint found issues. Failing the workflow."
+          exit 1
+
+      - name: Block PR if ESLint fails
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              event: 'REQUEST_CHANGES',
+              body: 'ESLint check failed. Please fix all linting issues (including warnings) before merging.'
+            })
