@@ -33,10 +33,10 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
-            cd /home/azureuser/server
-            sudo rm -rf healthcare_static_build/*
+            cd /home/azureuser/server/healthcare_static_build/build
+            sudo rm -rf ./
             
-            scp -r ${GITHUB_WORKSPACE}/build/* healthcare_static_build/
+            scp -r ${GITHUB_WORKSPACE}/build/. .
             
             docker-compose down
             docker-compose build
