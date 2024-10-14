@@ -49,19 +49,17 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
-            echo "Current directory on VM:"
-            pwd
-            echo "VM directory contents:"
-            ls -la
-            
+            echo "Current directory on VM: $(pwd)"
             cd /home/azureuser/server
+            echo "Changed to directory: $(pwd)"
+            
             sudo rm -rf healthcare_static_build/build/*
             
             # Ensure the destination directory exists
             mkdir -p healthcare_static_build/build
             
             # Use rsync with debug output
-            rsync -avz --delete ${{ github.workspace }}/build/ healthcare_static_build/build/ || echo "rsync failed"
+            rsync -avz --delete /home/runner/work/reacttest1/reacttest1/build/ healthcare_static_build/build/
             
             # List contents after rsync
             echo "Contents of healthcare_static_build/build/:"
