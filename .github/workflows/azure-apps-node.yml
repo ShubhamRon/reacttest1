@@ -41,7 +41,7 @@ jobs:
             mkdir -p healthcare_static_build/build
             
             # Use rsync instead of scp
-            rsync -avz --delete ${{ github.workspace }}/build/ healthcare_static_build/build/
+            rsync -avz --delete ${{ github.workspace }}/build/ healthcare_static_build/build/ || echo "rsync failed"
             
             docker-compose down
             docker-compose build
