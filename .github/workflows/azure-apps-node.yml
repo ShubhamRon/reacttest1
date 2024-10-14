@@ -34,9 +34,10 @@ jobs:
           echo "Build directory contents:"
           ls -la build
 
-      # Create SSH key file from secret (if needed)
+      # Create SSH key file from secret (with directory creation)
       - name: Create SSH key file
         run: |
+          mkdir -p /home/runner/.ssh
           echo "${{ secrets.KEY }}" > /home/runner/.ssh/id_rsa
           chmod 600 /home/runner/.ssh/id_rsa
 
@@ -60,4 +61,4 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd /home/azureuser/server/healthcare_static_build/
-            ls -ll
+            ls -l
