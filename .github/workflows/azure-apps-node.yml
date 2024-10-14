@@ -34,14 +34,22 @@ jobs:
           echo "Build directory contents:"
           ls -la build
 
-      # Setup SSH and SCP to copy build files to EC2
+      # Create SSH key file from secret (if needed)
+      - name: Create SSH key file
+        run: |
+          echo "${{ secrets.KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 600 /home/runner/.ssh/id_rsa
+
+      # Setup SSH config (optional but recommended)
+      - name: Configure SSH
+        run: |
+          echo "Host ${{ secrets.HOST }}" > /home/runner/.ssh/config
+          echo "  StrictHostKeyChecking no" >> /home/runner/.ssh/config
+
+      # Copy build files to EC2
       - name: Copy build files to EC2
         run: |
-          scp -i ${{ secrets.KEY }} -r build/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/azureuser/server/healthcare_static_build/
-        env:
-          EC2_HOST: ${{ secrets.HOST }}       # Your EC2 instance public IP or domain
-          EC2_USER: ${{ secrets.USERNAME }}       # EC2 user (usually 'ubuntu' for Ubuntu AMIs)
-          EC2_KEY: ${{ secrets.KEY }}         # Private SSH key stored in GitHub Secrets
+          scp -i /home/runner/.ssh/id_rsa -r build/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/azureuser/server/healthcare_static_build/
 
       # Restart Express server on EC2
       - name: Restart Express server on EC2
@@ -52,6 +60,4 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd /home/azureuser/server/healthcare_static_build/
-            ls -l
-            
-            
+            ls -ll
