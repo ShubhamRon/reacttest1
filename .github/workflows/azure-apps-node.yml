@@ -23,9 +23,12 @@ jobs:
         
       - name: start the build
         run: |
-          CI=false # remove this to after fixing warnings
+          CI=false # remove this to after fixing warnings 
           npm run build
-       
+
+      - name: List built files
+        run: ls -R build/
+        
       - name: Deploy to VM
         uses: appleboy/ssh-action@master
         with:
@@ -36,7 +39,7 @@ jobs:
             cd /home/azureuser/server/healthcare_static_build/build
             sudo rm -rf ./
             
-            scp -r ${GITHUB_WORKSPACE}/build/. .
+            scp -r ${GITHUB_WORKSPACE}/build/. ./
             
             docker-compose down
             docker-compose build
