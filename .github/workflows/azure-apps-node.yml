@@ -1,20 +1,19 @@
 name: Strict ESLint Check
-
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   push:
-    branches: [main]
+    branches:
+      - main
 
 permissions:
   pull-requests: write
-  contents: read
 
 jobs:
   lint:
     name: Run ESLint
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -24,17 +23,8 @@ jobs:
         with:
           node-version: '16'
 
-      - name: Debug - List directory contents
-        run: ls -la
-
-      - name: Debug - Print working directory
-        run: pwd
-
       - name: Install dependencies
-        run: npm ci
-
-      - name: Debug - List installed packages
-        run: npm list
+        run: npm install
 
       - name: Run ESLint
         run: npm run lint:strict
@@ -46,7 +36,7 @@ jobs:
         run: |
           echo "ESLint found issues. Failing the workflow."
           exit 1
-
+          
       - name: Block PR if ESLint fails
         if: failure() && github.event_name == 'pull_request'
         uses: actions/github-script@v6
