@@ -32,7 +32,7 @@ jobs:
           
       - name: SCP files to VM
         run: |
-          scp -i ${{ secrets.KEY }} -r build/* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/azureuser/server/healthcare_static_build/build/
+          scp -i ${{ secrets.KEY }} -r build/ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home/azureuser/server/healthcare_static_build/build/
         
       - name: Deploy to VM
         uses: appleboy/ssh-action@master
