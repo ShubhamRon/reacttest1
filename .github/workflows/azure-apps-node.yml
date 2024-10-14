@@ -1,10 +1,8 @@
 name: Deploy to Azure VM
-
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,14 +19,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: start the build
+      - name: Debug - Pre-build directory structure
         run: |
-          CI=false # remove this to after fixing warnings 
-          npm run build
-
-      - name: List built files
-        run: ls -R build/
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          echo "Package.json contents:"
+          cat package.json
         
+      - name: Start the build
+        run: |
+          CI=false # remove this after fixing warnings 
+          npm run build
+        
+      - name: Debug - Post-build directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          echo "Build directory contents (if exists):"
+          ls -la build || echo "Build directory does not exist"
+          
       - name: Deploy to VM
         uses: appleboy/ssh-action@master
         with:
@@ -36,12 +49,23 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           script: |
+            echo "Current directory on VM:"
+            pwd
+            echo "VM directory contents:"
+            ls -la
+            
             cd /home/azureuser/server
             sudo rm -rf healthcare_static_build/build/*
+            
+            # Ensure the destination directory exists
             mkdir -p healthcare_static_build/build
             
-            # Use rsync instead of scp
+            # Use rsync with debug output
             rsync -avz --delete ${{ github.workspace }}/build/ healthcare_static_build/build/ || echo "rsync failed"
+            
+            # List contents after rsync
+            echo "Contents of healthcare_static_build/build/:"
+            ls -R healthcare_static_build/build/
             
             docker-compose down
             docker-compose build
