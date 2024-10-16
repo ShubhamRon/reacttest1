@@ -5,10 +5,14 @@ on:
     branches:
       - main
 
+# Add this permissions block
+permissions:
+  pull-requests: write
+  contents: read
+
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -26,6 +30,7 @@ jobs:
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.2.3
+        id: deploy-netlify  # Add this line to create an id for the step
         with:
           publish-dir: ./build
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -37,7 +42,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const url = 'https://' + '${{ steps.deploy-preview.outputs.url }}';
+            const url = '${{ steps.deploy-netlify.outputs.deploy-url }}';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
