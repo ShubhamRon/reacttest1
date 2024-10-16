@@ -2,6 +2,9 @@
   command = "npm run build"
   publish = "build"
 
+[[plugins]]
+  package = "./netlify-build-plugin.js"
+
 [[redirects]]
   from = "/healthcare/*"
   to = "/healthcare/index.html"
