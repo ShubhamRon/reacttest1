@@ -23,9 +23,6 @@ jobs:
       - name: Debug - Show package.json
         run: cat package.json
 
-      - name: Debug - Show build script
-        run: npm run build --dry-run
-
       - name: Start the build
         run: |
           CI=false # remove this after fixing warnings
