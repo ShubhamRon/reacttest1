@@ -20,15 +20,30 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Debug - Show package.json
+        run: cat package.json
+
+      - name: Debug - Show build script
+        run: npm run build --dry-run
+
       - name: Start the build
         run: |
           CI=false # remove this after fixing warnings
           npm run build
 
-      - name: List build directory contents
+      - name: Debug - List build directory contents
         run: |
           echo "Contents of the build directory:"
           ls -R build
+
+      - name: Debug - Check for index.html
+        run: |
+          if [ -f "build/index.html" ]; then
+            echo "index.html exists"
+            cat build/index.html | head -n 20
+          else
+            echo "index.html does not exist"
+          fi
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.2.3
@@ -43,7 +58,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
-      - name: Output Netlify logs
+      - name: Debug - Netlify deploy output
         if: always()
         run: |
           echo "Netlify Deploy Output:"
