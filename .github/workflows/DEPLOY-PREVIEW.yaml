@@ -35,7 +35,7 @@ jobs:
       - name: Post Netlify preview link as a PR comment
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PR_TOKEN }}
           script: |
             const url = 'https://' + '${{ steps.deploy-preview.outputs.url }}';
             github.rest.issues.createComment({
