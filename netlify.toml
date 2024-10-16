@@ -6,7 +6,7 @@
   from = "/healthcare/*"
   to = "/healthcare/index.html"
   status = 200
-
+ 
 [[redirects]]
   from = "/*"
   to = "/healthcare/index.html"
