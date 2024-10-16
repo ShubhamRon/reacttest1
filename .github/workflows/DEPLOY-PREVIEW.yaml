@@ -25,20 +25,34 @@ jobs:
           CI=false # remove this after fixing warnings
           npm run build
 
+      - name: List build directory contents
+        run: |
+          echo "Contents of the build directory:"
+          ls -R build
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.2.3
         id: deploy-netlify
         with:
-          publish-dir: ./build
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          publish-dir: './build'
           production-deploy: false 
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          enable-commit-status: true
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
+      - name: Output Netlify logs
+        if: always()
+        run: |
+          echo "Netlify Deploy Output:"
+          echo "${{ steps.deploy-netlify.outputs.NETLIFY_OUTPUT }}"
+          echo "Deploy URL: ${{ steps.deploy-netlify.outputs.deploy-url }}"
+
       - name: Post Netlify preview link as a PR comment
         uses: actions/github-script@v6
+        if: success()
         with:
           github-token: ${{ secrets.PR_TOKEN }}
           script: |
@@ -48,7 +62,9 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `Netlify Preview URL: [Preview the deployment here](${deployUrl})`
+                body: `Netlify Preview URL: [Preview the deployment here](${deployUrl})
+                
+                If the preview doesn't load correctly, please check the build logs for more information.`
               });
             } else {
               console.log('Deploy URL not found. Skipping comment creation.');
